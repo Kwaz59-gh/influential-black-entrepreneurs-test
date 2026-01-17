@@ -1,0 +1,1046 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Influential Black Entrepreneurs in Africa & the Diaspora</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --color-primary: #1a5f7a;
+            --color-accent: #d4a574;
+            --color-bg: #f5f7fa;
+            --color-text: #1a1a1a;
+            --color-border: #e0e5eb;
+            --color-success: #27ae60;
+            --color-warning: #e67e22;
+            --color-danger: #c0142f;
+            --color-info: #3498db;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--color-bg);
+            color: var(--color-text);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--color-primary) 0%, #0d3a47 100%);
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+            margin-bottom: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        header p {
+            font-size: 1.1em;
+            opacity: 0.95;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .filter-btn {
+            padding: 10px 20px;
+            border: 2px solid var(--color-primary);
+            background: white;
+            color: var(--color-primary);
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-size: 0.95em;
+        }
+
+        .filter-btn:hover, .filter-btn.active {
+            background: var(--color-primary);
+            color: white;
+        }
+
+        .view-toggle {
+            display: flex;
+            gap: 10px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .view-btn {
+            padding: 10px 15px;
+            border: none;
+            background: #e0e5eb;
+            color: var(--color-primary);
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .view-btn.active {
+            background: var(--color-primary);
+            color: white;
+        }
+        .export-buttons {
+            display: flex;
+            gap: 10px;
+            margin-left: 20px;
+        }
+
+        .export-btn {
+            padding: 10px 20px;
+            border: 2px solid var(--color-success);
+            background: white;
+            color: var(--color-success);
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-size: 0.95em;
+        }
+
+        .export-btn:hover {
+            background: var(--color-success);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(39, 174, 96, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .export-buttons {
+                margin-left: 0;
+                width: 100%;
+            }
+
+            .export-btn {
+                flex: 1;
+            }
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            border-left: 4px solid var(--color-accent);
+        }
+
+        .stat-card h3 {
+            font-size: 2em;
+            color: var(--color-primary);
+            margin-bottom: 5px;
+        }
+
+        .stat-card p {
+            font-size: 0.9em;
+            color: #666;
+            margin: 0;
+        }
+
+        .entrepreneurs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .entrepreneur-card {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+            border-left: 5px solid var(--color-accent);
+        }
+
+        .entrepreneur-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.12);
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, var(--color-primary) 0%, #0d3a47 100%);
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .card-header h3 {
+            flex: 1;
+            margin: 0 0 5px 0;
+            font-size: 1.3em;
+        }
+
+        .card-header p {
+            margin: 0;
+            font-size: 0.85em;
+            opacity: 0.9;
+        }
+
+        .sector-badge {
+            display: inline-block;
+            background: var(--color-accent);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: 600;
+            margin-top: 8px;
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        .info-row {
+            display: flex;
+            margin-bottom: 12px;
+            font-size: 0.95em;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: var(--color-primary);
+            min-width: 100px;
+            margin-right: 10px;
+        }
+
+        .info-value {
+            color: #333;
+            flex: 1;
+        }
+
+        .metric {
+            background: var(--color-bg);
+            padding: 10px;
+            border-radius: 6px;
+            margin: 8px 0;
+            border-left: 3px solid var(--color-success);
+        }
+
+        .metric.growth {
+            border-left-color: var(--color-success);
+        }
+
+        .metric.employees {
+            border-left-color: var(--color-info);
+        }
+
+        .metric.users {
+            border-left-color: var(--color-warning);
+        }
+
+        .metric.impact {
+            border-left-color: var(--color-danger);
+        }
+
+        .metric-label {
+            font-size: 0.85em;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .metric-value {
+            font-size: 1.1em;
+            color: var(--color-primary);
+            font-weight: 700;
+            margin-top: 3px;
+        }
+
+        .table-view {
+            display: none;
+            margin-top: 40px;
+        }
+
+        .table-view.active {
+            display: block;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        thead {
+            background: linear-gradient(135deg, var(--color-primary) 0%, #0d3a47 100%);
+            color: white;
+        }
+
+        th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        tbody tr:hover {
+            background-color: var(--color-bg);
+        }
+
+        .sector-label {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+
+        .sector-fintech { background-color: rgba(74, 144, 226, 0.15); color: #4a90e2; }
+        .sector-tech { background-color: rgba(52, 152, 219, 0.15); color: #3498db; }
+        .sector-healthcare { background-color: rgba(46, 213, 115, 0.15); color: #2ed573; }
+        .sector-retail { background-color: rgba(255, 205, 86, 0.15); color: #e67e22; }
+        .sector-energy { background-color: rgba(192, 20, 47, 0.15); color: #c0142f; }
+        .sector-fashion { background-color: rgba(186, 85, 211, 0.15); color: #ba55d3; }
+        .sector-other { background-color: rgba(149, 165, 166, 0.15); color: #7f8c8d; }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        .legend {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .legend h3 {
+            margin-bottom: 15px;
+            color: var(--color-primary);
+        }
+
+        .legend-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 3px;
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 1.8em;
+            }
+
+            .entrepreneurs-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .controls {
+                flex-direction: column;
+            }
+
+            .filter-btn {
+                width: 100%;
+            }
+
+            table {
+                font-size: 0.9em;
+            }
+
+            th, td {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚀 Influential Black Entrepreneurs</h1>
+            <p>Africa & the Diaspora | Innovation, Impact & Wealth Creation</p>
+        </header>
+
+        <div class="legend">
+            <h3>Business Sectors</h3>
+            <div class="legend-grid">
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: #4a90e2;"></div>
+                    <span>Fintech & Payments</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: #3498db;"></div>
+                    <span>Technology & Software</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: #2ed573;"></div>
+                    <span>Healthcare & Wellness</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: #e67e22;"></div>
+                    <span>Retail & E-Commerce</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: #c0142f;"></div>
+                    <span>Energy & Resources</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: #ba55d3;"></div>
+                    <span>Fashion & Creative</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>40+</h3>
+                <p>Influential Entrepreneurs Featured</p>
+            </div>
+            <div class="stat-card">
+                <h3>$100B+</h3>
+                <p>Diaspora Economic Power (Annual)</p>
+            </div>
+            <div class="stat-card">
+                <h3>9 Unicorns</h3>
+                <p>$1B+ Valued African Startups</p>
+            </div>
+            <div class="stat-card">
+                <h3>1.4B+</h3>
+                <p>Jobs Created & Supported</p>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="filter-btn active" onclick="filterByCategory('all', event)">All Entrepreneurs</button>
+            <button class="filter-btn" onclick="filterByCategory('fintech', event)">Fintech & Payments</button>
+            <button class="filter-btn" onclick="filterByCategory('tech', event)">Technology</button>
+            <button class="filter-btn" onclick="filterByCategory('healthcare', event)">Healthcare</button>
+            <button class="filter-btn" onclick="filterByCategory('retail', event)">Retail</button>
+            <button class="filter-btn" onclick="filterByCategory('energy', event)">Energy</button>
+            <button class="filter-btn" onclick="filterByCategory('other', event)">Other</button>
+            <div class="view-toggle">
+                <button class="view-btn active" onclick="switchView('grid', event)">Grid</button>
+                <button class="view-btn" onclick="switchView('table', event)">Table</button>
+            </div>
+            <div class="export-buttons">
+                <button class="export-btn" onclick="exportToCSV()" title="Export to CSV (Excel/Google Sheets)">📊 Export CSV</button>
+                <button class="export-btn" onclick="exportToExcel()" title="Export to Excel (.xlsx)">📈 Export Excel</button>
+            </div>
+        </div>
+
+        <div class="entrepreneurs-grid" id="gridView">
+            <!-- Cards will be generated here -->
+        </div>
+
+        <div class="table-view" id="tableView">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Entrepreneur</th>
+                        <th>Company</th>
+                        <th>Sector</th>
+                        <th>Net Worth / Valuation</th>
+                        <th>Impact Metric</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <!-- Rows will be generated here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const entrepreneurs = [
+            {
+                name: "Aliko Dangote",
+                company: "Dangote Group",
+                sector: "energy",
+                location: "Nigeria",
+                netWorth: "$25.6B",
+                focus: "Cement, Sugar, Refinery",
+                impact: "Africa's largest oil refinery; 200,000+ jobs",
+                employees: "20,000+",
+                countries: "5 African countries",
+                image: "🏭",
+                category: "energy"
+            },
+            {
+                name: "Tope Awotona",
+                company: "Calendly",
+                sector: "tech",
+                location: "Nigeria → USA",
+                netWorth: "$1.4B",
+                focus: "Scheduling Software (SaaS)",
+                impact: "10M+ users globally",
+                employees: "250+",
+                funding: "$350M",
+                image: "📅",
+                category: "tech"
+            },
+            {
+                name: "Iyinoluwa Aboyeji",
+                company: "Andela",
+                sector: "tech",
+                location: "Nigeria → Global",
+                netWorth: "$1.5B+ (Valuation)",
+                focus: "Borderless Tech Talent",
+                impact: "10,000+ engineers connected; $1.5B valuation",
+                employees: "500+",
+                reach: "50+ countries",
+                image: "👨‍💻",
+                category: "tech"
+            },
+            {
+                name: "Abbey Wemimo",
+                company: "Esusu Financial",
+                sector: "fintech",
+                location: "Nigeria → USA",
+                netWorth: "$1B+",
+                focus: "Rent-to-Credit Platform",
+                impact: "100,000+ users; financial inclusion",
+                employees: "100+",
+                funding: "Goldman Sachs 100 Most Intriguing",
+                image: "💳",
+                category: "fintech"
+            },
+            {
+                name: "Iyinoluwa Agboola",
+                company: "Flutterwave",
+                sector: "fintech",
+                location: "Nigeria → Global",
+                netWorth: "$3.2B",
+                focus: "Payment Infrastructure",
+                impact: "100M+ transactions annually; $3.2B valuation",
+                employees: "600+",
+                countries: "10+ African countries",
+                image: "💰",
+                category: "fintech"
+            },
+            {
+                name: "Dare Okoudjou",
+                company: "Onafriq (MFS Africa)",
+                sector: "fintech",
+                location: "Ghana → Global",
+                netWorth: "$300-500M",
+                focus: "Cross-border Payments",
+                impact: "Millions of mobile wallets connected",
+                employees: "200+",
+                markets: "Africa's largest payments hub",
+                image: "🌍",
+                category: "fintech"
+            },
+            {
+                name: "Ladi Delano & Jide Odunsi",
+                company: "Moove",
+                sector: "fintech",
+                location: "Nigeria → Global",
+                netWorth: "$200M+",
+                focus: "Vehicle Financing",
+                impact: "10,000+ gig drivers financed",
+                employees: "300+",
+                markets: "6 African countries",
+                image: "🚗",
+                category: "fintech"
+            },
+            {
+                name: "Amin Nour & Hamdi Ulukaya",
+                company: "Chipper Cash",
+                sector: "fintech",
+                location: "Senegal/Kenya → Global",
+                netWorth: "$1.25B",
+                focus: "Peer-to-Peer Payments",
+                impact: "Millions of users; seamless remittances",
+                employees: "200+",
+                countries: "9 African countries",
+                image: "📱",
+                category: "fintech"
+            },
+            {
+                name: "Tom Ilube",
+                company: "Crossword Cybersecurity",
+                sector: "tech",
+                location: "UK (British Nigerian)",
+                netWorth: "$500M+",
+                focus: "Cybersecurity Solutions",
+                impact: "African Science Academy established",
+                employees: "150+",
+                impact2: "FTSE-listed company",
+                image: "🔐",
+                category: "tech"
+            },
+            {
+                name: "Jessica Matthews",
+                company: "Uncharted Power",
+                sector: "tech",
+                location: "USA (African American)",
+                netWorth: "$200M+",
+                focus: "Smart City Infrastructure",
+                impact: "US Electricity Advisory Committee",
+                employees: "100+",
+                recognition: "Bill Clinton endorsed",
+                image: "⚡",
+                category: "tech"
+            },
+            {
+                name: "Kanya King",
+                company: "MOBO Awards",
+                sector: "other",
+                location: "UK (British Ghanaian)",
+                netWorth: "$100M+",
+                focus: "Music & Cultural Platform",
+                impact: "Celebrating Black music globally",
+                employees: "50+",
+                reach: "20 years of awards",
+                image: "🎵",
+                category: "other"
+            },
+            {
+                name: "Adebayo Ogunlesi",
+                company: "Photon Energy & Private Equity",
+                sector: "energy",
+                location: "Nigeria → USA",
+                netWorth: "$2.4B",
+                focus: "Private Equity & Infrastructure",
+                impact: "African infrastructure development",
+                employees: "500+",
+                recognition: "Forbes richest immigrants 2025",
+                image: "💼",
+                category: "energy"
+            },
+            {
+                name: "Mahdi Yettou",
+                company: "Yassir",
+                sector: "retail",
+                location: "Algeria → Regional",
+                netWorth: "$1B (Valuation)",
+                focus: "Super App (Mobility, Food, Finance)",
+                impact: "Millions of users; 9 countries",
+                employees: "1,000+",
+                reach: "Multi-service platform",
+                image: "🛵",
+                category: "retail"
+            },
+            {
+                name: "Femi Otedola",
+                company: "Otedola Group",
+                sector: "energy",
+                location: "Nigeria",
+                netWorth: "$1.6B",
+                focus: "Energy & Banking",
+                impact: "Nigeria's energy sector leader",
+                employees: "5,000+",
+                markets: "Oil, gas, banking",
+                image: "🛢️",
+                category: "energy"
+            },
+            {
+                name: "Mike Adenuga",
+                company: "Globacom / Conoil",
+                sector: "energy",
+                location: "Nigeria",
+                netWorth: "$6.3B",
+                focus: "Telecom & Oil",
+                impact: "100M+ telecom customers",
+                employees: "10,000+",
+                reach: "Major employer in Nigeria",
+                image: "📡",
+                category: "energy"
+            },
+            {
+                name: "Abdulsamad Rabiu",
+                company: "BUA Group",
+                sector: "energy",
+                location: "Nigeria",
+                netWorth: "$9.5B",
+                focus: "Cement, Sugar, Food",
+                impact: "Largest employer in Nigeria",
+                employees: "15,000+",
+                reach: "Pan-African operations",
+                image: "🏗️",
+                category: "energy"
+            },
+            {
+                name: "David Adjaye",
+                company: "Adjaye Associates",
+                sector: "other",
+                location: "UK (British Ghanaian)",
+                netWorth: "$500M+",
+                focus: "Architecture & Design",
+                impact: "Smithsonian African American Museum",
+                recognition: "OBE awarded",
+                projects: "100+ global projects",
+                image: "🏛️",
+                category: "other"
+            },
+            {
+                name: "Jessica Huie",
+                company: "Color Blind Cards / JHPR",
+                sector: "other",
+                location: "UK (British African)",
+                netWorth: "$50M+",
+                focus: "Multicultural Greeting Cards & PR",
+                impact: "First UK multicultural greeting cards",
+                employees: "30+",
+                reach: "Social enterprise focus",
+                image: "🎨",
+                category: "other"
+            },
+            {
+                name: "Tshego Molefi",
+                company: "Moli & Mela Group",
+                sector: "other",
+                location: "South Africa",
+                netWorth: "$50M+",
+                focus: "Waste Management & Recycling",
+                impact: "First Black/Woman-owned waste contract",
+                employees: "100+",
+                reach: "Environmental sustainability",
+                image: "♻️",
+                category: "other"
+            },
+            {
+                name: "Dumi Mahlangu",
+                company: "Chepa Streetwear",
+                sector: "fashion",
+                location: "South Africa",
+                netWorth: "$30M+",
+                focus: "Fashion & Streetwear",
+                impact: "Hot new fashion brand SA",
+                reach: "Young trendsetter market",
+                image: "👕",
+                category: "fashion"
+            },
+            {
+                name: "Freddie Harrel",
+                company: "RadSwan",
+                sector: "fashion",
+                location: "USA (African American)",
+                netWorth: "$50M+",
+                focus: "Premium Hair & Wigs",
+                impact: "100% premium synthetic innovation",
+                employees: "50+",
+                reach: "Global hair industry disruption",
+                image: "💇",
+                category: "fashion"
+            },
+            {
+                name: "Jermaine Craig",
+                company: "Kwanda",
+                sector: "other",
+                location: "UK (British African)",
+                netWorth: "$20M+",
+                focus: "Diaspora Philanthropy Platform",
+                impact: "Connecting diaspora to African projects",
+                projects: "100+ projects funded",
+                image: "🤝",
+                category: "other"
+            },
+            {
+                name: "Patrick Soon-Shiong",
+                company: "NantKwest / Nantero",
+                sector: "healthcare",
+                location: "South Africa → USA",
+                netWorth: "$5.6B",
+                focus: "Pharmaceutical Innovation",
+                impact: "Nanotechnology and cancer research",
+                employees: "5,000+",
+                recognition: "Forbes billionaire",
+                image: "🔬",
+                category: "healthcare"
+            },
+            {
+                name: "Rodney Sacks",
+                company: "The Coca-Cola Company",
+                sector: "retail",
+                location: "South Africa",
+                netWorth: "$3.6B",
+                focus: "Beverage (Energy Drinks)",
+                impact: "Global distribution; 10,000+ jobs",
+                employees: "10,000+",
+                recognition: "Major shareholder",
+                image: "🥤",
+                category: "retail"
+            },
+            {
+                name: "Haim Saban",
+                company: "Saban Capital Group",
+                sector: "other",
+                location: "Egypt → USA",
+                netWorth: "$3.1B",
+                focus: "Television & Investments",
+                impact: "Entertainment and media innovator",
+                employees: "2,000+",
+                reach: "Global media presence",
+                image: "📺",
+                category: "other"
+            },
+            {
+                name: "Marc Lasry",
+                company: "Lasry Capital Management",
+                sector: "fintech",
+                location: "Morocco → USA",
+                netWorth: "$1.9B",
+                focus: "Hedge Funds & Finance",
+                impact: "Major investor in African startups",
+                employees: "200+",
+                reach: "Global wealth management",
+                image: "📊",
+                category: "fintech"
+            }
+        ];
+
+        let currentFilter = 'all';
+        let currentView = 'grid';
+
+        function renderCards() {
+            const gridView = document.getElementById('gridView');
+            const tableBody = document.getElementById('tableBody');
+            
+            const filtered = currentFilter === 'all' 
+                ? entrepreneurs 
+                : entrepreneurs.filter(e => e.category === currentFilter);
+
+            if (currentView === 'grid') {
+                gridView.innerHTML = filtered.map(e => `
+                    <div class="entrepreneur-card" data-category="${e.category}">
+                        <div class="card-header">
+                            <div>
+                                <h3>${e.image} ${e.name}</h3>
+                                <p>${e.company}</p>
+                                <span class="sector-badge">${e.sector.toUpperCase()}</span>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="info-row">
+                                <span class="info-label">Location:</span>
+                                <span class="info-value">${e.location}</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Net Worth:</span>
+                                <span class="info-value" style="color: var(--color-primary); font-weight: 700;">${e.netWorth}</span>
+                            </div>
+                            <div class="metric growth">
+                                <div class="metric-label">💼 Focus</div>
+                                <div class="metric-value">${e.focus}</div>
+                            </div>
+                            <div class="metric impact">
+                                <div class="metric-label">📈 Impact</div>
+                                <div class="metric-value">${e.impact}</div>
+                            </div>
+                            ${e.employees ? `
+                            <div class="metric employees">
+                                <div class="metric-label">👥 Employees</div>
+                                <div class="metric-value">${e.employees}</div>
+                            </div>
+                            ` : ''}
+                            ${e.countries ? `
+                            <div class="metric users">
+                                <div class="metric-label">🌍 Countries</div>
+                                <div class="metric-value">${e.countries}</div>
+                            </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                tableBody.innerHTML = filtered.map(e => `
+                    <tr>
+                        <td><strong>${e.image} ${e.name}</strong></td>
+                        <td>${e.company}</td>
+                        <td><span class="sector-label sector-${e.category}">${e.sector}</span></td>
+                        <td>${e.netWorth}</td>
+                        <td>${e.impact}</td>
+                    </tr>
+                `).join('');
+            }
+
+            if (filtered.length === 0) {
+                const emptyState = '<div class="empty-state"><p>No entrepreneurs found in this category.</p></div>';
+                gridView.innerHTML = emptyState;
+                tableBody.innerHTML = '';
+            }
+        }
+
+        function filterByCategory(category, event) {
+            currentFilter = category;
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            if (event && event.target) {
+                event.target.classList.add('active');
+            } else {
+                // Fallback: find button by category
+                document.querySelectorAll('.filter-btn').forEach(btn => {
+                    if (btn.textContent.toLowerCase().includes(category === 'all' ? 'all' : category)) {
+                        btn.classList.add('active');
+                    }
+                });
+            }
+            renderCards();
+        }
+
+        function switchView(view, event) {
+            currentView = view;
+            document.getElementById('gridView').classList.toggle('active', view === 'grid');
+            document.getElementById('tableView').classList.toggle('active', view === 'table');
+            document.querySelectorAll('.view-btn').forEach(btn => btn.classList.remove('active'));
+            if (event && event.target) {
+                event.target.classList.add('active');
+            } else {
+                // Fallback: find button by view type
+                document.querySelectorAll('.view-btn').forEach(btn => {
+                    if (btn.textContent.toLowerCase() === view) {
+                        btn.classList.add('active');
+                    }
+                });
+            }
+            renderCards();
+        }
+
+        // Eksport til CSV (virker i både Excel og Google Sheets)
+        function exportToCSV() {
+            const filtered = currentFilter === 'all' 
+                ? entrepreneurs 
+                : entrepreneurs.filter(e => e.category === currentFilter);
+
+            // Opret CSV header
+            const headers = ['Name', 'Company', 'Sector', 'Location', 'Net Worth', 'Focus', 'Impact', 'Employees', 'Countries/Reach', 'Funding/Recognition'];
+            
+            // Konverter data til CSV rækker
+            const csvRows = [
+                headers.join(','), // Header row
+                ...filtered.map(e => {
+                    const row = [
+                        `"${(e.name || '').replace(/"/g, '""')}"`,
+                        `"${(e.company || '').replace(/"/g, '""')}"`,
+                        `"${(e.sector || '').replace(/"/g, '""')}"`,
+                        `"${(e.location || '').replace(/"/g, '""')}"`,
+                        `"${(e.netWorth || '').replace(/"/g, '""')}"`,
+                        `"${(e.focus || '').replace(/"/g, '""')}"`,
+                        `"${(e.impact || '').replace(/"/g, '""')}"`,
+                        `"${(e.employees || '').replace(/"/g, '""')}"`,
+                        `"${(e.countries || e.reach || e.markets || '').replace(/"/g, '""')}"`,
+                        `"${(e.funding || e.recognition || '').replace(/"/g, '""')}"`
+                    ];
+                    return row.join(',');
+                })
+            ];
+            
+            const csv = csvRows.join('\n');
+            
+            // Download filen
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', `Black_Entrepreneurs_${currentFilter === 'all' ? 'All' : currentFilter}_${new Date().toISOString().split('T')[0]}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Eksport til Excel (.xlsx format)
+        function exportToExcel() {
+            // Tjek om SheetJS er tilgængelig
+            if (typeof XLSX === 'undefined') {
+                alert('Excel export requires SheetJS library. Falling back to CSV export.');
+                exportToCSV();
+                return;
+            }
+
+            const filtered = currentFilter === 'all' 
+                ? entrepreneurs 
+                : entrepreneurs.filter(e => e.category === currentFilter);
+
+            // Forbered data til Excel
+            const excelData = filtered.map(e => ({
+                'Name': e.name || '',
+                'Company': e.company || '',
+                'Sector': e.sector || '',
+                'Location': e.location || '',
+                'Net Worth': e.netWorth || '',
+                'Focus': e.focus || '',
+                'Impact': e.impact || '',
+                'Employees': e.employees || '',
+                'Countries/Reach': e.countries || e.reach || e.markets || '',
+                'Funding/Recognition': e.funding || e.recognition || '',
+                'Category': e.category || ''
+            }));
+
+            // Opret workbook og worksheet
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.json_to_sheet(excelData);
+
+            // Sæt kolonnebredder
+            const colWidths = [
+                { wch: 25 }, // Name
+                { wch: 30 }, // Company
+                { wch: 15 }, // Sector
+                { wch: 25 }, // Location
+                { wch: 18 }, // Net Worth
+                { wch: 35 }, // Focus
+                { wch: 40 }, // Impact
+                { wch: 15 }, // Employees
+                { wch: 20 }, // Countries/Reach
+                { wch: 30 }, // Funding/Recognition
+                { wch: 12 }  // Category
+            ];
+            ws['!cols'] = colWidths;
+
+            // Tilføj worksheet til workbook
+            XLSX.utils.book_append_sheet(wb, ws, 'Entrepreneurs');
+
+            // Download filen
+            const filename = `Black_Entrepreneurs_${currentFilter === 'all' ? 'All' : currentFilter}_${new Date().toISOString().split('T')[0]}.xlsx`;
+            XLSX.writeFile(wb, filename);
+        }
+
+        // Initial render
+        renderCards();
+    </script>
+</body>
+</html>
